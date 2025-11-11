@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    container_name: center-portal
+    ports:
+      - "8085:80" # Порт для доступа к вашему приложению Порт_внешний:Порт_контейнера
+    volumes:
+      - ./portal:/var/www/html
+    depends_on:
+      - postgres
+    networks:
+      - center-net
+
+  postgres:
+    image: postgres:16.1
+    container_name: center-database
+    environment:
+      POSTGRES_DB: eif_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - center-net
+  
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: center-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@server.com
+      - PGADMIN_DEFAULT_PASSWORD=12345678
+      #- PGADMIN_DEFAULT_PORT=8880
+    ports:
+      - "8081:80" # Порт для доступа к вашему приложению Порт_внешний:Порт_контейнера
+    depends_on:
+      - postgres
+    networks:
+      - center-net
+
+volumes:
+  db-data:
+
+networks:
+  center-net:
+    driver: bridge
